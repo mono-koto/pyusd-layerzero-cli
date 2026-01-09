@@ -1,4 +1,5 @@
 import type {Address, Hex, PublicClient, WalletClient} from 'viem'
+import {toEventSignature} from 'viem'
 
 import type {MessagingFee, QuoteResult, SendParam} from '../types/index'
 
@@ -6,13 +7,23 @@ import {erc20Abi} from './abi/erc20'
 import {ioftAbi} from './abi/ioft'
 
 /**
- * OFTSent event signature
- * keccak256("OFTSent(bytes32,uint32,address,uint256,uint256)")
- *
- * This event is emitted when tokens are sent cross-chain. The GUID (first indexed topic)
+ * OFTSent event definition
+ * Emitted when tokens are sent cross-chain. The GUID (first indexed topic)
  * is a globally unique identifier used to track the message across LayerZero network.
  */
-const OFT_SENT_EVENT_SIGNATURE = '0x85496b760a4b7f8d66384b9df21b381f5d1b1e79f229a47aaf4c232edc2fe59a' as const
+const OFT_SENT_EVENT = {
+  type: 'event',
+  name: 'OFTSent',
+  inputs: [
+    {name: 'guid', type: 'bytes32', indexed: true},
+    {name: 'dstEid', type: 'uint32', indexed: true},
+    {name: 'fromAddress', type: 'address', indexed: true},
+    {name: 'amountSentLD', type: 'uint256', indexed: false},
+    {name: 'amountReceivedLD', type: 'uint256', indexed: false},
+  ],
+} as const
+
+const OFT_SENT_EVENT_SIGNATURE = toEventSignature(OFT_SENT_EVENT)
 
 /**
  * Get the underlying ERC20 token address for an OFT

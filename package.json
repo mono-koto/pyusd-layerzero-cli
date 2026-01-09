@@ -9,6 +9,7 @@
   "bugs": "https://github.com/pyusd-lz/pyusd-lz/issues",
   "dependencies": {
     "@commander-js/extra-typings": "^14.0.0",
+    "@layerzerolabs/lz-v2-utilities": "^3.0.152",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
     "ora": "^9.0.0",

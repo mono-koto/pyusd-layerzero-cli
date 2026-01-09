@@ -18,7 +18,14 @@ const configDir = join(__dirname, '../../config')
 // Determine if we're in testnet mode
 export const isTestnet = process.env.TESTNET === 'true' || process.env.TESTNET === '1'
 
-// Load chain configs from JSON files
+/**
+ * Load chain configs from JSON files
+ *
+ * Loads configuration from config/mainnet.json or config/testnet.json based on TESTNET env var.
+ * Applies RPC URL overrides from environment variables (e.g., RPC_ETHEREUM, RPC_ARBITRUM_SEPOLIA).
+ *
+ * If config file is missing, suggests running `fetch-chains` command.
+ */
 function loadChainConfigs(): Record<string, ChainConfig> {
   const configFile = isTestnet ? 'testnet.json' : 'mainnet.json'
   const configPath = join(configDir, configFile)
@@ -38,69 +45,12 @@ function loadChainConfigs(): Record<string, ChainConfig> {
       }
     }
     return result
-  } catch {
-    // Fallback to hardcoded defaults if config file not found
-    return getDefaultConfigs()
-  }
-}
-
-function getDefaultConfigs(): Record<string, ChainConfig> {
-  if (isTestnet) {
-    return {
-      'arbitrum-sepolia': {
-        blockExplorer: 'https://sepolia.arbiscan.io',
-        chainId: 421_614,
-        chainKey: 'arbitrum-sepolia',
-        eid: 40_231,
-        name: 'Arbitrum Sepolia',
-        nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-        pyusdAddress: '0x637A1259C6afd7E3AdF63993cA7E58BB438aB1B1',
-        rpcUrl: process.env.RPC_ARBITRUM_SEPOLIA || 'https://sepolia-rollup.arbitrum.io/rpc',
-      },
-      'ethereum-sepolia': {
-        blockExplorer: 'https://sepolia.etherscan.io',
-        chainId: 11_155_111,
-        chainKey: 'ethereum-sepolia',
-        eid: 40_161,
-        name: 'Ethereum Sepolia',
-        nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-        pyusdAddress: '0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9',
-        rpcUrl: process.env.RPC_ETHEREUM_SEPOLIA || 'https://rpc.sepolia.org',
-      },
-    }
-  }
-
-  return {
-    arbitrum: {
-      blockExplorer: 'https://arbiscan.io',
-      chainId: 42_161,
-      chainKey: 'arbitrum',
-      eid: 30_110,
-      name: 'Arbitrum',
-      nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-      pyusdAddress: '0xfab5891ed867a1195303251912013b92c4fc3a1d',
-      rpcUrl: process.env.RPC_ARBITRUM || 'https://arb1.arbitrum.io/rpc',
-    },
-    ethereum: {
-      blockExplorer: 'https://etherscan.io',
-      chainId: 1,
-      chainKey: 'ethereum',
-      eid: 30_101,
-      name: 'Ethereum',
-      nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-      pyusdAddress: '0xa2c323fe5a74adffad2bf3e007e36bb029606444',
-      rpcUrl: process.env.RPC_ETHEREUM || 'https://eth.llamarpc.com',
-    },
-    polygon: {
-      blockExplorer: 'https://polygonscan.com',
-      chainId: 137,
-      chainKey: 'polygon',
-      eid: 30_109,
-      name: 'Polygon',
-      nativeCurrency: { decimals: 18, name: 'POL', symbol: 'POL' },
-      pyusdAddress: '0xfab5891ed867a1195303251912013b92c4fc3a1d',
-      rpcUrl: process.env.RPC_POLYGON || 'https://polygon.llamarpc.com',
-    },
+  } catch (error) {
+    console.error(`Error: Failed to load ${configFile}`)
+    console.error(`Please run: npm run cli fetch-chains`)
+    console.error('')
+    console.error(`Alternatively, create ${configPath} manually with chain configurations.`)
+    process.exit(1)
   }
 }
 

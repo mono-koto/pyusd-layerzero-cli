@@ -1,15 +1,14 @@
 import { Command } from '@commander-js/extra-typings'
 
-import type { SendParam } from '../types/index'
-
 import { getChainConfig } from '../lib/chains'
-import { createPublicClientForChain, createWalletClientForChain, getAddressFromPrivateKey } from '../lib/client'
+import { createPublicClientForChain, createWalletClientForChain } from '../lib/client'
+import { resolveAddress } from '../lib/input-validation'
 import { checkAndApprove, getBalance, getTokenAddress, quoteSend, send } from '../lib/oft'
-import { buildLzReceiveOptions, DEFAULT_GAS_LIMIT } from '../lib/options'
-import { addressToBytes32 } from '../utils/address'
-import { calculateMinAmount, formatAmount, formatNativeFee, parseAmount, truncateAddress } from '../utils/format'
+import { DEFAULT_GAS_LIMIT } from '../lib/options'
+import { prepareSendParam } from '../lib/send-preparation'
+import { formatAmount, formatNativeFee, truncateAddress } from '../utils/format'
 
-export const sendCommand = new Command('send')
+export const transferCommand = new Command('transfer')
   .description('Execute a PYUSD cross-chain transfer')
   .argument('<source>', 'Source chain (e.g., ethereum, arbitrum, polygon)')
   .argument('<destination>', 'Destination chain')
@@ -21,29 +20,25 @@ export const sendCommand = new Command('send')
   .action(async (source, destination, amount, options) => {
     const privateKey = process.env.PRIVATE_KEY
     if (!privateKey) {
-      console.error('Error: PRIVATE_KEY environment variable is required for sending')
+      console.error('Error: PRIVATE_KEY environment variable is required for transfers')
       process.exit(1)
     }
 
     const srcConfig = getChainConfig(source)
     const dstConfig = getChainConfig(destination)
 
-    const senderAddress = getAddressFromPrivateKey(privateKey as `0x${string}`)
+    // Resolve sender and recipient addresses
+    const senderAddress = resolveAddress({ requirePrivateKey: true })
     const recipientAddress = (options.to || senderAddress) as `0x${string}`
 
-    const amountLD = parseAmount(amount)
-    const slippagePercent = Number.parseFloat(options.slippage)
-    const minAmountLD = calculateMinAmount(amountLD, slippagePercent)
-
-    const sendParam: SendParam = {
-      amountLD,
-      composeMsg: '0x',
-      dstEid: dstConfig.eid,
-      extraOptions: buildLzReceiveOptions(BigInt(options.gas)),
-      minAmountLD,
-      oftCmd: '0x',
-      to: addressToBytes32(recipientAddress),
-    }
+    // Prepare SendParam with all parameters
+    const { sendParam, amountLD } = prepareSendParam({
+      amount,
+      destination,
+      recipient: recipientAddress,
+      slippage: options.slippage,
+      gas: options.gas,
+    })
 
     const publicClient = createPublicClientForChain(source)
     const walletClient = createWalletClientForChain(source, privateKey as `0x${string}`)

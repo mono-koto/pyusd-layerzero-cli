@@ -54,7 +54,7 @@ RPC_POLYGON=https://polygon-mainnet.g.alchemy.com/v2/YOUR_KEY
 To use testnet chains, set the `TESTNET` environment variable:
 
 ```bash
-TESTNET=true npm run cli chains list
+TESTNET=true npm run cli chains
 ```
 
 For testnet, configure these RPC endpoints:
@@ -71,7 +71,7 @@ RPC_ARBITRUM_SEPOLIA=https://arb-sepolia.g.alchemy.com/v2/YOUR_KEY
 ### List Supported Chains
 
 ```bash
-npm run cli chains list
+npm run cli chains
 ```
 
 Output:
@@ -130,20 +130,50 @@ Min Transfer:   0.000001 PYUSD
 Max Transfer:   1000000.00 PYUSD
 ```
 
-### Send PYUSD Cross-Chain
+### Transfer PYUSD Cross-Chain
 
 ```bash
-# Send to yourself on another chain
-npm run cli send ethereum arbitrum 100
+# Transfer to yourself on another chain
+npm run cli transfer ethereum arbitrum 100
 
-# Send to a different recipient
-npm run cli send ethereum arbitrum 100 --to 0x5678...
+# Transfer to a different recipient
+npm run cli transfer ethereum arbitrum 100 --to 0x5678...
 
 # Dry run (simulate without sending)
-npm run cli send ethereum arbitrum 100 --dry-run
+npm run cli transfer ethereum arbitrum 100 --dry-run
 
 # Custom slippage tolerance
-npm run cli send ethereum arbitrum 100 --slippage 1
+npm run cli transfer ethereum arbitrum 100 --slippage 1
+```
+
+### Check Transfer Status
+
+Track the status of a cross-chain transfer using the LayerZero Scan API:
+
+```bash
+npm run cli status 0xe4439a92601ec6b8f6698acc2821721fa58c9d81dd4c1c30f3e80bc251d138f8
+```
+
+Output:
+```
+Cross-Chain Transfer Status
+────────────────────────────────────────────────────────────
+Status:       ✓ DELIVERED
+Message:      Executor transaction confirmed
+GUID:         0x8acd9553...
+
+Source
+────────────────────────────────────────────────────────────
+Chain:        ethereum
+From:         0x5555...562A
+TX Hash:      0xe4439a92...
+Timestamp:    1/6/2026, 9:46:59 AM
+
+Destination
+────────────────────────────────────────────────────────────
+Chain:        arbitrum
+TX Hash:      0xe917e041...
+Timestamp:    1/6/2026, 9:50:12 AM
 ```
 
 ### Fetch Chain Configurations
@@ -156,7 +186,7 @@ npm run cli fetch-chains
 
 ## Command Reference
 
-### `chains list`
+### `chains`
 
 List all supported PYUSD chains.
 
@@ -187,7 +217,7 @@ Get a fee quote for a cross-chain transfer.
 - `--slippage` - Slippage tolerance in percent (default: 0.5)
 - `--gas` - Gas limit for destination execution (default: 200000)
 
-### `send <source> <destination> <amount>`
+### `transfer <source> <destination> <amount>`
 
 Execute a cross-chain PYUSD transfer.
 
@@ -201,6 +231,13 @@ Execute a cross-chain PYUSD transfer.
 - `--slippage` - Slippage tolerance in percent (default: 0.5)
 - `--gas` - Gas limit for destination execution (default: 200000)
 - `--dry-run` - Simulate without sending
+
+### `status <txHash>`
+
+Check the status of a cross-chain transfer using LayerZero Scan API.
+
+**Arguments:**
+- `txHash` - Source chain transaction hash
 
 ### `fetch-chains`
 
@@ -225,11 +262,11 @@ Fetch PYUSD chain configurations from LayerZero metadata API.
 
 1. **LayerZero OFT**: PYUSD uses LayerZero's OFT standard for cross-chain transfers. Each chain has a PYUSD OFT adapter that handles locking/unlocking or minting/burning tokens.
 
-2. **Quote**: Before sending, the CLI fetches a quote from the source chain's OFT contract to determine the LayerZero messaging fee.
+2. **Quote**: Before transferring, the CLI fetches a quote from the source chain's OFT contract to determine the LayerZero messaging fee.
 
 3. **Approval**: If the OFT adapter requires ERC20 approval (for OFT Adapters), the CLI will automatically approve the transfer.
 
-4. **Send**: The CLI calls the OFT `send()` function with the destination chain ID, recipient address, and amount. LayerZero handles the cross-chain message delivery.
+4. **Transfer**: The CLI calls the OFT `send()` function with the destination chain ID, recipient address, and amount. LayerZero handles the cross-chain message delivery.
 
 5. **Receive**: On the destination chain, LayerZero calls the OFT's `lzReceive()` function to mint or unlock tokens to the recipient.
 
@@ -242,7 +279,8 @@ src/
 │   ├── chains.ts         # List supported chains
 │   ├── fetch-chains.ts   # Fetch config from API
 │   ├── quote.ts          # Get transfer quote
-│   └── send.ts           # Execute transfer
+│   ├── transfer.ts       # Execute transfer
+│   └── status.ts         # Check transfer status
 ├── lib/
 │   ├── abi/
 │   │   ├── ioft.ts       # IOFT interface ABI
@@ -266,10 +304,10 @@ config/
 
 ```bash
 # Run CLI directly with tsx
-npm run cli chains list
+npm run cli chains
 
 # Run with testnet
-TESTNET=true npm run cli chains list
+TESTNET=true npm run cli chains
 
 # Build (type check)
 npm run build

@@ -6,7 +6,8 @@ import { balanceCommand } from '../src/commands/balance'
 import { chainsCommand } from '../src/commands/chains'
 import { fetchChainsCommand } from '../src/commands/fetch-chains'
 import { quoteCommand } from '../src/commands/quote'
-import { sendCommand } from '../src/commands/send'
+import { statusCommand } from '../src/commands/status'
+import { transferCommand } from '../src/commands/transfer'
 
 const program = new Command()
   .name('pyusd-lz')
@@ -15,7 +16,8 @@ const program = new Command()
 
 program.addCommand(balanceCommand)
 program.addCommand(quoteCommand)
-program.addCommand(sendCommand)
+program.addCommand(transferCommand)
+program.addCommand(statusCommand)
 program.addCommand(chainsCommand)
 program.addCommand(fetchChainsCommand)
 

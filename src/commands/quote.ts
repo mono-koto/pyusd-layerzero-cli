@@ -1,13 +1,12 @@
 import { Command } from '@commander-js/extra-typings'
 
-import type { SendParam } from '../types/index'
-
 import { getChainConfig } from '../lib/chains'
-import { createPublicClientForChain, getAddressFromPrivateKey } from '../lib/client'
+import { createPublicClientForChain } from '../lib/client'
+import { resolveAddress } from '../lib/input-validation'
 import { quoteSend } from '../lib/oft'
-import { buildLzReceiveOptions, DEFAULT_GAS_LIMIT } from '../lib/options'
-import { addressToBytes32 } from '../utils/address'
-import { calculateMinAmount, formatAmount, formatNativeFee, parseAmount } from '../utils/format'
+import { DEFAULT_GAS_LIMIT } from '../lib/options'
+import { prepareSendParam } from '../lib/send-preparation'
+import { formatAmount, formatNativeFee } from '../utils/format'
 
 export const quoteCommand = new Command('quote')
   .description('Get a fee quote for a PYUSD cross-chain transfer')
@@ -21,31 +20,17 @@ export const quoteCommand = new Command('quote')
     const srcConfig = getChainConfig(source)
     const dstConfig = getChainConfig(destination)
 
-    const amountLD = parseAmount(amount)
-    const slippagePercent = Number.parseFloat(options.slippage)
-    const minAmountLD = calculateMinAmount(amountLD, slippagePercent)
+    // Resolve recipient address
+    const recipientAddress = resolveAddress({ address: options.to })
 
-    let recipientAddress: `0x${string}`
-    if (options.to) {
-      recipientAddress = options.to as `0x${string}`
-    } else {
-      const privateKey = process.env.PRIVATE_KEY
-      if (!privateKey) {
-        console.error('Error: Either --to flag or PRIVATE_KEY environment variable is required')
-        process.exit(1)
-      }
-      recipientAddress = getAddressFromPrivateKey(privateKey as `0x${string}`)
-    }
-
-    const sendParam: SendParam = {
-      amountLD,
-      composeMsg: '0x',
-      dstEid: dstConfig.eid,
-      extraOptions: buildLzReceiveOptions(BigInt(options.gas)),
-      minAmountLD,
-      oftCmd: '0x',
-      to: addressToBytes32(recipientAddress),
-    }
+    // Prepare SendParam with all parameters
+    const { sendParam, minAmountLD } = prepareSendParam({
+      amount,
+      destination,
+      recipient: recipientAddress,
+      slippage: options.slippage,
+      gas: options.gas,
+    })
 
     const client = createPublicClientForChain(source)
 

@@ -3,10 +3,6 @@ import { Command } from '@commander-js/extra-typings'
 import { getSupportedChains, isTestnet } from '../lib/chains'
 
 export const chainsCommand = new Command('chains')
-  .description('Commands for listing supported PYUSD chains')
-
-chainsCommand
-  .command('list')
   .description('List all chains where PYUSD is available via LayerZero')
   .option('-f, --format <format>', 'Output format (table or json)', 'table')
   .action((options) => {

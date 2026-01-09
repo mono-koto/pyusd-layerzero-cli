@@ -6,6 +6,15 @@ import {erc20Abi} from './abi/erc20'
 import {ioftAbi} from './abi/ioft'
 
 /**
+ * OFTSent event signature
+ * keccak256("OFTSent(bytes32,uint32,address,uint256,uint256)")
+ *
+ * This event is emitted when tokens are sent cross-chain. The GUID (first indexed topic)
+ * is a globally unique identifier used to track the message across LayerZero network.
+ */
+const OFT_SENT_EVENT_SIGNATURE = '0x85496b760a4b7f8d66384b9df21b381f5d1b1e79f229a47aaf4c232edc2fe59a' as const
+
+/**
  * Get the underlying ERC20 token address for an OFT
  * Falls back to the address itself if it's not an OFT adapter (e.g., raw token on testnet)
  */
@@ -166,8 +175,7 @@ export async function send(
   // The guid is the first indexed topic in the OFTSent event
   let guid: Hex = '0x'
   for (const log of receipt.logs) {
-    // OFTSent event signature
-    if (log.topics[0] === '0x85496b760a4b7f8d66384b9df21b381f5d1b1e79f229a47aaf4c232edc2fe59a') {
+    if (log.topics[0] === OFT_SENT_EVENT_SIGNATURE) {
       guid = log.topics[1] as Hex
       break
     }

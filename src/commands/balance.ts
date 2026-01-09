@@ -1,7 +1,8 @@
 import { Command } from '@commander-js/extra-typings'
 
 import { getChainConfig } from '../lib/chains'
-import { createPublicClientForChain, getAddressFromPrivateKey } from '../lib/client'
+import { createPublicClientForChain } from '../lib/client'
+import { resolveAddress } from '../lib/input-validation'
 import { getBalance, getTokenAddress } from '../lib/oft'
 import { formatAmount } from '../utils/format'
 
@@ -12,17 +13,8 @@ export const balanceCommand = new Command('balance')
   .action(async (chain, options) => {
     const chainConfig = getChainConfig(chain)
 
-    let address: `0x${string}`
-    if (options.address) {
-      address = options.address as `0x${string}`
-    } else {
-      const privateKey = process.env.PRIVATE_KEY
-      if (!privateKey) {
-        console.error('Error: Either --address flag or PRIVATE_KEY environment variable is required')
-        process.exit(1)
-      }
-      address = getAddressFromPrivateKey(privateKey as `0x${string}`)
-    }
+    // Resolve address from flag or private key
+    const address = resolveAddress({ address: options.address })
 
     const client = createPublicClientForChain(chain)
 

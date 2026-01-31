@@ -1,6 +1,6 @@
-# pyusd-lz
+# PYUSD LayerZero Stargate Transfers
 
-A CLI tool for cross-chain PYUSD transfers via Stargate Finance.
+A CLI tool implementing all [PYUSD and PYUSD0 cross-chain transfers via LayerZero Stargate Hydra](https://layerzero.network/blog/LayerZero%20brings%20Global%20Distribution%20to%20PayPal%20USD).
 
 ## Overview
 

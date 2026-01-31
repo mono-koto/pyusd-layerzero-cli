@@ -13,10 +13,12 @@ Transfer PYUSD/PYUSD0 across chains using the Stargate Finance API. Zero slippag
 Run `npm run cli update-chains` to fetch the latest from Stargate, or `npm run cli chains` to see what's configured.
 
 **PYUSD** (Native PayPal USD):
-- Ethereum, Arbitrum
+- Ethereum, Arbitrum, Solana
 
-**PYUSD0** (Synthetic):
-- Avalanche, Sei, Ink, Abstract, Plume
+**PYUSD0** (Synthetic via Stargate Hydra):
+- Avalanche, Sei, Ink, Abstract, Plume, Polygon, Fraxtal, Codex, Flow, Stable, Tron*
+
+*\*Tron is listed in Stargate's config but not yet supported by this CLI.*
 
 ## Installation
 
@@ -29,12 +31,27 @@ npm install
 Create a `.env` file:
 
 ```bash
-# Required for transfers
+# Required for EVM transfers (Ethereum, Arbitrum, etc.)
 PRIVATE_KEY=0x...
+
+# Required for Solana transfers (base58 or hex format)
+SOLANA_PRIVATE_KEY=...
 
 # Optional: Custom RPC endpoints
 RPC_ETHEREUM=https://...
 RPC_ARBITRUM=https://...
+RPC_SOLANA=https://...
+```
+
+**Using 1Password:** If your private keys are stored in 1Password, use `op run`:
+
+```bash
+# .env with 1Password references
+PRIVATE_KEY=op://vault/item/evm-key
+SOLANA_PRIVATE_KEY=op://vault/item/solana-key
+
+# Run commands with op
+op run --env-file=.env -- npm run cli transfer solana arbitrum 10
 ```
 
 ## Usage
@@ -63,8 +80,11 @@ npm run cli quote arbitrum avalanche 100 --address 0x...
 # Dry run first
 npm run cli transfer arbitrum avalanche 100 --dry-run
 
-# Execute
+# Execute EVM transfer
 npm run cli transfer arbitrum avalanche 100
+
+# Execute Solana transfer (requires SOLANA_PRIVATE_KEY)
+npm run cli transfer solana arbitrum 100
 ```
 
 ### Update Chain Data
@@ -75,9 +95,13 @@ npm run cli update-chains
 
 ## Routing Notes
 
-- **PYUSD chains** (Ethereum, Arbitrum) can transfer to each other directly
-- **PYUSD0 chains** (Avalanche, Sei, etc.) can transfer to each other directly
-- **Cross-transfers** from Ethereum to PYUSD0 chains require going through Arbitrum first
+- **PYUSD ↔ PYUSD**: Ethereum, Arbitrum, and Solana can transfer to each other
+- **PYUSD → PYUSD0**: Arbitrum can transfer to any PYUSD0 chain directly
+- **PYUSD0 ↔ PYUSD0**: All PYUSD0 chains can transfer to each other directly (mesh network)
+- **Ethereum → PYUSD0**: Requires two hops (Ethereum → Arbitrum → destination)
+- **Solana → PYUSD0**: Routes through the Stargate API mesh network
+
+The Stargate API handles routing automatically. If a direct route isn't available, the CLI will suggest the required hops.
 
 ## Commands
 

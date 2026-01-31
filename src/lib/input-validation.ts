@@ -1,4 +1,5 @@
 import { getAddressFromPrivateKey } from './client'
+import { getSolanaAddressFromPrivateKey } from './solana-client'
 
 /**
  * Resolve address from options or environment variable
@@ -25,4 +26,20 @@ export function resolveAddress(options: {
   }
 
   return getAddressFromPrivateKey(privateKey as `0x${string}`)
+}
+
+/**
+ * Resolve Solana address from SOLANA_PRIVATE_KEY environment variable
+ *
+ * @returns Solana address (base58)
+ */
+export function resolveSolanaAddress(): string {
+  const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY
+  if (!solanaPrivateKey) {
+    console.error('Error: SOLANA_PRIVATE_KEY environment variable is required')
+    console.error('       Key should be base58 encoded (Solana CLI format) or 64-byte hex.')
+    process.exit(1)
+  }
+
+  return getSolanaAddressFromPrivateKey(solanaPrivateKey)
 }

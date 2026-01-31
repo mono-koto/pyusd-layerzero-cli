@@ -28,15 +28,6 @@ export function formatNativeFee(feeWei: bigint, symbol: string): string {
 }
 
 /**
- * Calculate minimum amount with slippage protection
- */
-export function calculateMinAmount(amount: bigint, slippagePercent: number): bigint {
-  const slippageBps = BigInt(Math.floor(slippagePercent * 100))
-  const minAmount = amount - (amount * slippageBps) / 10_000n
-  return minAmount
-}
-
-/**
  * Truncate address for display
  */
 export function truncateAddress(address: string): string {

@@ -94,6 +94,13 @@ function getDefaultRpcUrl(chainKey: string): string {
     abstract: 'https://api.mainnet.abs.xyz',
     ink: 'https://rpc-qnd.inkonchain.com',
     plumephoenix: 'https://rpc.plume.org',
+    stable: 'https://free.testnet.stabilityprotocol.com',
+    fraxtal: 'https://rpc.frax.com',
+    polygon: 'https://polygon-rpc.com',
+    codex: 'https://rpc.codex.network',
+    flow: 'https://mainnet.evm.nodes.onflow.org',
+    // Solana uses @solana/web3.js clusterApiUrl by default, but can be overridden
+    solana: 'https://api.mainnet-beta.solana.com',
   }
   return defaults[chainKey] || `https://${chainKey}.rpc.default`
 }
@@ -148,6 +155,10 @@ export function getSupportedChains(): ChainConfig[] {
 
 export function isEvmChain(config: ChainConfig): boolean {
   return config.chainType === 'evm'
+}
+
+export function isSolanaChain(config: ChainConfig): boolean {
+  return config.chainType === 'solana'
 }
 
 export function getPyusdChains(): ChainConfig[] {

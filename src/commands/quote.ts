@@ -2,7 +2,7 @@ import { Command } from '@commander-js/extra-typings'
 
 import { isEvmChain, resolveChainConfigsForTransfer } from '../lib/chains'
 import { resolveAddress } from '../lib/input-validation'
-import { fetchStargateQuote } from '../lib/stargate'
+import { calculateMinAmount, fetchStargateQuote } from '../lib/stargate'
 import { formatAmount, parseAmount } from '../utils/format'
 
 export const quoteCommand = new Command('quote')
@@ -10,7 +10,7 @@ export const quoteCommand = new Command('quote')
   .argument('<source>', 'Source chain (e.g., ethereum, arbitrum, avalanche)')
   .argument('<destination>', 'Destination chain')
   .argument('<amount>', 'Amount of PYUSD to transfer')
-  .option('--address <address>', 'Sender address (or use PRIVATE_KEY env var)')
+  .option('-a, --address <address>', 'Sender address (or use PRIVATE_KEY env var)')
   .option('--to <address>', 'Recipient address on destination chain (defaults to sender)')
   .option('--slippage <percent>', 'Slippage tolerance in percent', '0.5')
   .action(async (source, destination, amount, options) => {
@@ -30,8 +30,7 @@ export const quoteCommand = new Command('quote')
     // Calculate amounts in base units
     const amountLD = parseAmount(amount)
     const slippagePercent = Number.parseFloat(options.slippage)
-    const slippageBps = Math.floor(slippagePercent * 100)
-    const minAmountLD = (amountLD * BigInt(10000 - slippageBps)) / BigInt(10000)
+    const minAmountLD = BigInt(calculateMinAmount(amountLD.toString(), slippagePercent))
 
     console.log('')
     console.log('PYUSD Transfer Quote (via Stargate)')

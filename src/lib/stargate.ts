@@ -6,7 +6,10 @@
  * executable transactions.
  */
 
+import type { Connection, Keypair } from '@solana/web3.js'
 import type { Address, Hex, PublicClient, WalletClient } from 'viem'
+
+import { executeSolanaTransaction } from './solana-client'
 
 // API configuration
 const STARGATE_API_BASE = 'https://stargate.finance/api/v1'
@@ -28,8 +31,9 @@ export interface StargateQuoteParams {
 }
 
 export interface StargateTransaction {
-  to: Address
-  data: Hex
+  // EVM transaction fields
+  to?: Address
+  data: string // Hex for EVM, base64 for Solana
   value?: string
 }
 
@@ -77,6 +81,13 @@ export interface StargateTransferResult {
   txHashes: Hex[]
   error?: string
   finalTxHash?: Hex // The bridge transaction hash for LayerZero tracking
+}
+
+export interface SolanaTransferResult {
+  success: boolean
+  signatures: string[]
+  error?: string
+  finalSignature?: string // The bridge transaction signature for LayerZero tracking
 }
 
 // ============================================================================
@@ -199,6 +210,14 @@ export async function executeStargateTransfer(
   const txHashes: Hex[] = []
   let finalTxHash: Hex | undefined
 
+  if (!walletClient.account) {
+    return {
+      success: false,
+      txHashes: [],
+      error: 'Wallet client has no account configured',
+    }
+  }
+
   try {
     for (let i = 0; i < quote.steps.length; i++) {
       const step = quote.steps[i]
@@ -215,8 +234,8 @@ export async function executeStargateTransfer(
         chain: typeof walletClient.chain
       } = {
         account: walletClient.account!,
-        to: tx.to,
-        data: tx.data,
+        to: tx.to as Address, // EVM transactions always have `to`
+        data: tx.data as Hex, // EVM transactions have hex-encoded data
         chain: walletClient.chain,
       }
 
@@ -243,7 +262,7 @@ export async function executeStargateTransfer(
     return {
       success: true,
       txHashes,
-      finalTxHash: finalTxHash || txHashes[txHashes.length - 1],
+      finalTxHash: finalTxHash || (txHashes.length > 0 ? txHashes[txHashes.length - 1] : undefined),
     }
   } catch (error) {
     return {
@@ -283,4 +302,63 @@ export async function isRouteSupported(
   })
 
   return result.success
+}
+
+// ============================================================================
+// Solana Transfer Execution
+// ============================================================================
+
+/**
+ * Execute a Stargate transfer from Solana
+ *
+ * Solana transactions come as base64-encoded VersionedTransactions from the API.
+ *
+ * @param connection - Solana connection
+ * @param keypair - Solana keypair for signing
+ * @param quote - The Stargate quote containing transaction steps
+ * @param onStep - Optional callback for progress updates
+ */
+export async function executeSolanaStargateTransfer(
+  connection: Connection,
+  keypair: Keypair,
+  quote: StargateQuote,
+  onStep?: (stepIndex: number, stepType: string, status: 'pending' | 'confirmed') => void
+): Promise<SolanaTransferResult> {
+  const signatures: string[] = []
+  let finalSignature: string | undefined
+
+  try {
+    for (let i = 0; i < quote.steps.length; i++) {
+      const step = quote.steps[i]
+
+      onStep?.(i, step.type, 'pending')
+
+      // Execute the Solana transaction (data is base64 encoded)
+      const signature = await executeSolanaTransaction(
+        connection,
+        keypair,
+        step.transaction.data
+      )
+
+      signatures.push(signature)
+      onStep?.(i, step.type, 'confirmed')
+
+      // Track the bridge transaction for LayerZero lookup
+      if (step.type === 'bridge') {
+        finalSignature = signature
+      }
+    }
+
+    return {
+      success: true,
+      signatures,
+      finalSignature: finalSignature || (signatures.length > 0 ? signatures[signatures.length - 1] : undefined),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      signatures,
+      error: error instanceof Error ? error.message : 'Solana transaction failed',
+    }
+  }
 }

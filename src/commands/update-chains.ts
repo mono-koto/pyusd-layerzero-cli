@@ -128,13 +128,18 @@ export const updateChainsCommand = new Command('update-chains')
           continue
         }
 
+        // Only lowercase EVM addresses (hex). Solana addresses are base58 and case-sensitive.
+        const tokenAddress = chain.chainType === 'evm'
+          ? token.address.toLowerCase()
+          : token.address
+
         config.chains[token.chainKey] = {
           chainKey: token.chainKey,
           chainType: chain.chainType,
           name: chain.name,
           chainId: chain.chainId,
           symbol: token.symbol as 'PYUSD' | 'PYUSD0',
-          tokenAddress: token.address.toLowerCase(),
+          tokenAddress,
           decimals: token.decimals,
           nativeCurrency: {
             symbol: chain.nativeCurrency.symbol,

@@ -1,6 +1,6 @@
 {
   "source": "stargate.finance/api/v1",
-  "updatedAt": "2026-01-28T22:13:00.577Z",
+  "updatedAt": "2026-01-31T00:05:57.279Z",
   "chains": {
     "arbitrum": {
       "chainKey": "arbitrum",
@@ -34,7 +34,7 @@
       "name": "Solana",
       "chainId": 1,
       "symbol": "PYUSD",
-      "tokenAddress": "2b1kv6dkpanxd5ixfnxcpjxmkwqjjaymczfhsfu24gxo",
+      "tokenAddress": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
       "decimals": 6,
       "nativeCurrency": {
         "symbol": "SOL",
@@ -125,7 +125,7 @@
       "name": "Tron",
       "chainId": 728126428,
       "symbol": "PYUSD0",
-      "tokenAddress": "0x6b5eafbcaf0e06d1a12c35e211263e3e51af767a",
+      "tokenAddress": "0x6b5Eafbcaf0E06d1A12C35e211263e3e51AF767a",
       "decimals": 6,
       "nativeCurrency": {
         "symbol": "TRX",

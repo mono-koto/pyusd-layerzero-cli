@@ -9,29 +9,37 @@ export {
   getPyusdChains,
   getPyusd0Chains,
   resolveChainConfigsForTransfer,
+  isEvmChain,
+  isSolanaChain,
 } from './lib/chains'
 
-// Client utilities
+// EVM Client utilities
 export {
   createPublicClientForChain,
   createWalletClientForChain,
   getAddressFromPrivateKey,
 } from './lib/client'
 
+// Solana Client utilities
+export {
+  createSolanaConnection,
+  createSolanaKeypair,
+  getSolanaAddressFromPrivateKey,
+  executeSolanaTransaction,
+} from './lib/solana-client'
+
 // Stargate API
 export {
   fetchStargateQuote,
   executeStargateTransfer,
-  isRouteSupported,
-  calculateMinAmount as calculateStargateMinAmount,
+  executeSolanaStargateTransfer,
+  calculateMinAmount,
 } from './lib/stargate'
 
 // Formatting utilities
 export {
   formatAmount,
   parseAmount,
-  formatNativeFee,
-  calculateMinAmount,
   truncateAddress,
   PYUSD_DECIMALS,
 } from './utils/format'
@@ -43,5 +51,6 @@ export type {
   StargateQuote,
   StargateQuoteResult,
   StargateTransferResult,
+  SolanaTransferResult,
   StargateStep,
 } from './lib/stargate'

@@ -68,20 +68,30 @@ https://layerzeroscan.com/tx/{bridgeTxHash}
 | Solana | `2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo` |
 
 ### PYUSD0
-| Chain | Address |
-|-------|---------|
-| Avalanche | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Sei | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Ink | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Abstract | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Plume | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+
+> ⚠️ PYUSD0 uses **two different token addresses** depending on the chain. Always verify the correct address for your target chain.
+
+| Chain | Chain Key | Address |
+|-------|-----------|---------|
+| Avalanche | `avalanche` | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Sei | `sei` | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Ink | `ink` | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Abstract | `abstract` | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Plume | `plumephoenix` | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Fraxtal | `fraxtal` | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Polygon | `polygon` | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Flow | `flow` | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Stable | `stable` | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Codex | `codex` | `0x99af3eea856556646c98c8b9b2548fe815240750` |
 
 ## Supported Routes
 
 **EVM Direct Routes:**
 - Ethereum ↔ Arbitrum
-- Arbitrum ↔ Avalanche, Sei, Ink, Abstract, Plume
-- Avalanche ↔ Sei ↔ Ink ↔ Abstract ↔ Plume (mesh network)
+- Arbitrum ↔ All PYUSD0 chains
+- All PYUSD0 chains ↔ All PYUSD0 chains (mesh network)
+
+**PYUSD0 Mesh Network:** Avalanche, Sei, Ink, Abstract, Plume, Fraxtal, Polygon, Flow, Stable, Codex can all transfer directly to each other without routing through Arbitrum.
 
 **Solana Routes:**
 - Solana ↔ Ethereum (direct)

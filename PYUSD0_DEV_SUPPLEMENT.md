@@ -37,16 +37,20 @@ console.log(pyusd0Chains.map((c) => c.key)); // ['ink', 'plumephoenix', 'avalanc
 
 ### Current PYUSD0 Chains (Reference Only)
 
-| Chain     | Chain ID | Token Address                                |
-| --------- | -------- | -------------------------------------------- |
-| Avalanche | 43114    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Sei       | 1329     | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Ink       | 57073    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Abstract  | 2741     | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Plume     | 98866    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
-| Fraxtal   | 252      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
-| Polygon   | 137      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
-| Flow      | 747      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+> ⚠️ PYUSD0 uses **two different token addresses** depending on the chain.
+
+| Chain     | Chain Key      | Chain ID | Token Address                                |
+| --------- | -------------- | -------- | -------------------------------------------- |
+| Avalanche | `avalanche`    | 43114    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Sei       | `sei`          | 1329     | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Ink       | `ink`          | 57073    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Abstract  | `abstract`     | 2741     | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Plume     | `plumephoenix` | 98866    | `0x142cdc44890978b506e745bb3bd11607b7f7faef` |
+| Fraxtal   | `fraxtal`      | 252      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Polygon   | `polygon`      | 137      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Flow      | `flow`         | 747      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Stable    | `stable`       | 988      | `0x99af3eea856556646c98c8b9b2548fe815240750` |
+| Codex     | `codex`        | 81224    | `0x99af3eea856556646c98c8b9b2548fe815240750` |
 
 > ⚠️ These addresses are provided for reference. Always fetch current addresses from the Stargate API.
 
@@ -229,6 +233,8 @@ async function getChainConfig(chainKey: string): Promise<ChainConfig> {
     fraxtal: 252,
     polygon: 137,
     flow: 747,
+    stable: 988,
+    codex: 81224,
   };
 
   const config: ChainConfig = {
@@ -280,13 +286,15 @@ const params = await getQuoteParams(
 All PYUSD0 chains can transfer directly to each other:
 
 ```
-  Avalanche ←→ Sei ←→ Ink ←→ Abstract ←→ Plume
-      ↑         ↑       ↑        ↑          ↑
-      └─────────┴───────┴────────┴──────────┘
-                  (mesh network)
+     Avalanche ←→ Sei ←→ Ink ←→ Abstract ←→ Plume
+          ↕         ↕       ↕        ↕          ↕
+     Fraxtal ←→ Polygon ←→ Flow ←→ Stable ←→ Codex
+          ↕         ↕       ↕        ↕          ↕
+          └─────────┴───────┴────────┴──────────┘
+                      (full mesh network)
 ```
 
-This means:
+Any PYUSD0 chain can send directly to any other PYUSD0 chain. This means:
 
 - **No hub dependency**: Unlike PYUSD transfers that may need to route through Arbitrum
 - **Lower fees**: Direct transfers avoid multi-hop gas costs
